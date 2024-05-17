@@ -1,12 +1,6 @@
 package DB.service;
 
-import DB.Dao.DBDao;
-import DB.DBUtil;
-import DB.ProductNotFoundException;
-import DB.dataRecord.DefaultRecord;
-
 import java.sql.SQLException;
-import java.util.List;
 
 public interface DBService {
     int delete(int id) throws SQLException;

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import DB.ProductNotFoundException;
+import DB.TangenDBNotFoundException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,7 +28,7 @@ class CompaniesServiceTest {
         var service=new CompaniesService();
 
         //エラーが出れば成功
-        ProductNotFoundException expected = assertThrows(ProductNotFoundException.class, () -> service.findById(22222));
+        TangenDBNotFoundException expected = assertThrows(TangenDBNotFoundException.class, () -> service.findById(22222));
         assertThat(expected.getMessage(), is("IDが存在しません"));
     }
 

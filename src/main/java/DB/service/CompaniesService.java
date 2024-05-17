@@ -2,10 +2,11 @@ package DB.service;
 
 import DB.DBUtil;
 import DB.dao.CompaniesDao;
-import DB.ProductNotFoundException;
+import DB.TangenDBNotFoundException;
 import DB.dataRecord.CompaniesRecord;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 interface CompaniesServiceInterface extends DBService{
@@ -27,7 +28,7 @@ public class CompaniesService implements CompaniesServiceInterface {
         try (var connection= DBUtil.getConnection()) {
             var dao=new CompaniesDao(connection);
             if(dao.findById(searchId)==null){
-                throw new ProductNotFoundException("IDが存在しません");
+                throw new TangenDBNotFoundException("IDが存在しません");
             }
             return dao.findById(searchId);
 
@@ -95,5 +96,23 @@ public class CompaniesService implements CompaniesServiceInterface {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public List<String> getAllName(){
+        try (var connection= DBUtil.getConnection()) {
+            var dao=new CompaniesDao(connection);
+            var allData=dao.readAll();
+
+            List<String>allName=new ArrayList<>();
+            for (var data:allData){
+                allName.add(data.name());
+            }
+            return allName;
+
+        }catch (SQLException e ) {
+            e.printStackTrace();
+        }
+        return null;
+
     }
 }

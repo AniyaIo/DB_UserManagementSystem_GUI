@@ -1,11 +1,14 @@
 package DB.service;
 
 import DB.DBUtil;
+import DB.dao.CompaniesDao;
 import DB.dao.UsersDao;
-import DB.ProductNotFoundException;
+import DB.TangenDBNotFoundException;
 import DB.dataRecord.UsersRecord;
+import com.example.db_usermanagementsystem_gui.UserData;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 interface UserServiceInterface extends DBService{
@@ -28,7 +31,7 @@ public class UsersService implements UserServiceInterface {
         try (var connection= DBUtil.getConnection()) {
             var dao=new UsersDao(connection);
             if(dao.findById(searchId)==null){
-                throw new ProductNotFoundException("IDが存在しません");
+                throw new TangenDBNotFoundException("IDが存在しません");
             }
             return dao.findById(searchId);
 
@@ -94,5 +97,25 @@ public class UsersService implements UserServiceInterface {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public List<UsersRecord> getAllData(){
+        try (var connection= DBUtil.getConnection()) {
+            var dao=new UsersDao(connection);
+            return dao.readAll();
+
+        }catch (SQLException e ) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<UserData> toUserData(List<UsersRecord> recordData){
+        List<UserData> userData=new ArrayList<UserData>();
+        List
+
+        for(var record:recordData){
+            userData.add(new UserData(record.id(),));
+        }
     }
 }

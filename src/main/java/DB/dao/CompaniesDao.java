@@ -3,6 +3,7 @@ package DB.dao;
 import DB.dataRecord.CompaniesRecord;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,24 @@ public class CompaniesDao implements CompaniesDaoInterface{
         super();
         this.datas=datas;
         this.tableName="companies";
+    }
+
+    public List<CompaniesRecord> readAll() throws SQLException {
+        var sql = "SELECT * FROM "+this.tableName+";";
+        List<CompaniesRecord> allData = new ArrayList<>();
+
+        try (var statement = datas.prepareStatement(sql);
+             var result = statement.executeQuery()) {
+
+            while (result.next()){
+                allData.add(new CompaniesRecord(
+                        result.getInt("id"),
+                        result.getString("name")));
+            }
+            return allData;
+        } catch (SQLException e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
@@ -70,18 +89,18 @@ public class CompaniesDao implements CompaniesDaoInterface{
 
     @Override
     public int insert(CompaniesRecord data) throws SQLException {
-        var sql = "INSERT INTO "+this.tableName+" (name) VALUES (?)";
+        var sql = "INSERT INTO "+this.tableName+" (name) VALUES (?);";
         var result=0;
         try (var statement = datas.prepareStatement(sql)) {
             // ?にパラメータを埋め込む
             statement.setString(1, data.name());
-
             // SQL実行
             result = statement.executeUpdate();
 
         } catch (SQLException e) {
             throw new SQLException(e);
         }
+
         return result;
     }
 
@@ -107,7 +126,7 @@ public class CompaniesDao implements CompaniesDaoInterface{
 
     @Override
     public int delete(int id) throws SQLException {
-        var sql = "DELETE FROM "+this.tableName+" WHERE id=?";
+        var sql = "DELETE FROM "+this.tableName+" WHERE id=?;";
         var result=0;
         try (var statement = datas.prepareStatement(sql)) {
             // ?にパラメータを埋め込む

@@ -10,7 +10,13 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+
+import static com.example.db_usermanagementsystem_gui.InputCheck.isInputData;
+import DB.service.CompaniesService;
+import DB.service.UsersService;
+
 
 public class DB_UserManagementSystemController implements Initializable {
     @FXML
@@ -33,7 +39,7 @@ public class DB_UserManagementSystemController implements Initializable {
     //DB用ユーザデータ
     private ObservableList<UserData> data;
     private int id=0;
-    private ObservableList<String> companyList = FXCollections.observableArrayList("Googla","Applo","Amazondo","Facewatch","Twitton");
+    private ObservableList<String> companyList;
 
 
     /**
@@ -44,10 +50,19 @@ public class DB_UserManagementSystemController implements Initializable {
     @FXML
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        var usersTable=new UsersService();  //テーブル操作オブジェクト
+        var companiesTable=new CompaniesService();
+        companyList = FXCollections.observableArrayList();
+        List<String> name= companiesTable.getAllName();
+        for(var n:name){
+            companyList.add(n);
+        }
+
+        //コンボボックスに企業名を入れる
         companyName.getItems().addAll(companyList);
         companyName.getSelectionModel().select(0);
 
-        //////一覧表示//////
+        //////ユーザ一覧表示//////
 
         //テストデータ
         this.data =FXCollections.observableArrayList(
@@ -130,50 +145,5 @@ public class DB_UserManagementSystemController implements Initializable {
 
     }
 
-    //メッセージ画面を出す
-    private void alertMessage(String message){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("問題が発生しました");
-        alert.setContentText(message);
-        alert.show();
-    }
 
-    /**
-     * データチェック
-     * @param name
-     * @param score
-     * @return
-     */
-    private boolean isInputData(String name,String score){
-        boolean isName=isName(name);
-        boolean isScore=isScore(score);
-
-        if(!isName && !isScore){
-            alertMessage("スコアと名前が正しく入力されていません");
-        }else if(!isName){
-            alertMessage("名前が正しく入力されていません");
-        }else if(!isScore){
-            alertMessage("スコアが正しく入力されていません");
-        } else if ((Integer.valueOf(score) < 0) || Integer.valueOf(score) > 100) {
-            alertMessage("スコアは0から100までの値しか入力できません");
-            return false;
-        }
-
-        return isName && isScore;
-    }
-
-    //UserDataに入れる値のチェックを行う
-    private boolean isName(String data){
-        return !(data.isEmpty() || data.isBlank());
-    }
-    private boolean isScore(String data){
-        boolean isScore = !(data.isEmpty() || data.isBlank());
-        for (int i = 0; i < data.length(); i++) {
-            if (!Character.isDigit(data.charAt(i))) {
-                isScore = false;
-                break;
-            }
-        }
-        return isScore;
-    }
 }

@@ -4,7 +4,7 @@ import DB.dataRecord.UsersRecord;
 import DB.service.UsersService;
 import org.junit.jupiter.api.Test;
 
-import DB.ProductNotFoundException;
+import DB.TangenDBNotFoundException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ class UsersServiceTest {
         var service=new UsersService();
 
         //エラーが出れば成功
-        ProductNotFoundException expected = assertThrows(ProductNotFoundException.class, () -> service.findById(22222));
+        TangenDBNotFoundException expected = assertThrows(TangenDBNotFoundException.class, () -> service.findById(22222));
         assertThat(expected.getMessage(), is("IDが存在しません"));
     }
 

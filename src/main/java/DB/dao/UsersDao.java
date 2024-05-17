@@ -1,5 +1,6 @@
 package DB.dao;
 
+import DB.dataRecord.CompaniesRecord;
 import DB.dataRecord.UsersRecord;
 
 import java.sql.Connection;
@@ -21,6 +22,26 @@ public class UsersDao  implements DBDao{
         super();
         this.datas=datas;
         this.tableName="users";
+    }
+
+    public List<UsersRecord> readAll() throws SQLException {
+        var sql = "SELECT * FROM "+this.tableName+";";
+        List<UsersRecord> allData = new ArrayList<>();
+
+        try (var statement = datas.prepareStatement(sql);
+             var result = statement.executeQuery()) {
+
+            while (result.next()){
+                allData.add(new UsersRecord(
+                        result.getInt("id"),
+                        result.getString("name"),
+                        result.getInt("companyId"),
+                        result.getInt("score")));
+            }
+            return allData;
+        } catch (SQLException e) {
+            throw new SQLException(e);
+        }
     }
 
     public UsersRecord findById(int searchId) throws SQLException {

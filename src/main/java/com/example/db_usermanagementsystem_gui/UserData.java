@@ -16,7 +16,6 @@ public class UserData {
         this.company=new SimpleStringProperty(company);
         this.name=new SimpleStringProperty(name);
         this.score=new SimpleIntegerProperty(score);
-
     }
 
     // アクセサメソッド

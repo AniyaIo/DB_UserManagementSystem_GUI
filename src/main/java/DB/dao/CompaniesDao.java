@@ -28,9 +28,8 @@ public class CompaniesDao implements CompaniesDaoInterface{
     public List<CompaniesRecord> readAll() throws SQLException {
         var sql = "SELECT * FROM "+this.tableName+";";
         List<CompaniesRecord> allData = new ArrayList<>();
-
         try (var statement = datas.prepareStatement(sql);
-             var result = statement.executeQuery()) {
+            var result = statement.executeQuery()) {
 
             while (result.next()){
                 allData.add(new CompaniesRecord(

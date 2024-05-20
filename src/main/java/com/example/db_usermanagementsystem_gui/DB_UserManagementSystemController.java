@@ -1,5 +1,7 @@
 package com.example.db_usermanagementsystem_gui;
 
+import DB.DBUtil;
+import DB.dataRecord.UsersRecord;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -10,12 +12,14 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import static com.example.db_usermanagementsystem_gui.InputCheck.isInputData;
 import DB.service.CompaniesService;
 import DB.service.UsersService;
+import static com.example.db_usermanagementsystem_gui.DisplayWindow.alertMessage;
 
 
 public class DB_UserManagementSystemController implements Initializable {
@@ -36,9 +40,6 @@ public class DB_UserManagementSystemController implements Initializable {
     @FXML
     private TableColumn<UserData, IntegerProperty> scoreColumn;
 
-    //DB用ユーザデータ
-    private ObservableList<UserData> data;
-    private int id=0;
     private ObservableList<String> companyList;
 
 
@@ -50,36 +51,23 @@ public class DB_UserManagementSystemController implements Initializable {
     @FXML
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        var usersTable=new UsersService();  //テーブル操作オブジェクト
-        var companiesTable=new CompaniesService();
-        companyList = FXCollections.observableArrayList();
-        List<String> name= companiesTable.getAllName();
-        for(var n:name){
-            companyList.add(n);
-        }
+        var companiesTable=new CompaniesService(); //テーブル操作オブジェクト
 
+        //企業名をリストに格納
+        companyList = FXCollections.observableArrayList(companiesTable.getAllName());
         //コンボボックスに企業名を入れる
-        companyName.getItems().addAll(companyList);
+        companyName.getItems().setAll(companyList);
         companyName.getSelectionModel().select(0);
 
         //////ユーザ一覧表示//////
-
-        //テストデータ
-        this.data =FXCollections.observableArrayList(
-            new UserData(this.id++,companyList.get(0),"Tanaka",45),
-            new UserData(this.id++,companyList.get(2),"Yamada",80),
-            new UserData(this.id++,companyList.get(4),"Satou",72)
-        );
         this.dataTable.setEditable(true);
         this.dataTable.getSelectionModel().setCellSelectionEnabled(false);
-        this.dataTable.setItems(this.data);
-
+        updateUsersData();
         //行要素とフィールド紐づけ
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         companyColumn.setCellValueFactory(new PropertyValueFactory<>("company"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         scoreColumn.setCellValueFactory(new PropertyValueFactory<>("score"));
-
     }
 
     /**
@@ -87,6 +75,7 @@ public class DB_UserManagementSystemController implements Initializable {
      */
     @FXML
     protected void insertUserEvent() {
+        var usersTable=new UsersService();  //テーブル操作オブジェクト
         String userCompany= companyName.getValue();
         String addName=userNameInput.getText();
         String addScore=userScoreInput.getText();
@@ -96,7 +85,16 @@ public class DB_UserManagementSystemController implements Initializable {
             return;
         }
 
-        data.add(new UserData(this.id++,userCompany,addName,Integer.valueOf(addScore)));
+        try {
+            usersTable.insertUserData(new UserData(
+                    1,
+                    userCompany,
+                    addName,
+                    Integer.parseInt(addScore)));
+            updateUsersData();
+        }catch (SQLException e){
+            alertMessage("データの挿入に失敗しました。");
+        }
     }
 
     /**
@@ -104,8 +102,17 @@ public class DB_UserManagementSystemController implements Initializable {
      */
     @FXML
     protected void deleteUserEvent(){
+        var usersTable=new UsersService();  //テーブル操作オブジェクト
         UserData itemList=dataTable.getSelectionModel().getSelectedItem();
-        this.data.remove(itemList);
+        try {
+            usersTable.delete(itemList.getId().getValue());
+            updateUsersData();
+        }catch (SQLException e){
+            alertMessage("データの削除に失敗しました。");
+        }catch (IndexOutOfBoundsException | NullPointerException e){
+            alertMessage("データを選択してください。");
+        }
+
     }
 
     /**
@@ -113,15 +120,24 @@ public class DB_UserManagementSystemController implements Initializable {
      */
     @FXML
     protected void updateUserEvent(){
+        //選択されたカラムのデータ取得
         UserData itemList=dataTable.getSelectionModel().getSelectedItem();
-        System.out.println(itemList);
         if(!isInputData(nameColumn.getText(),userScoreInput.getText())){
             return;
         }
 
-        itemList.setCompany(companyName.getValue());
-        itemList.setName(userNameInput.getText());
-        itemList.setScore(Integer.parseInt(userScoreInput.getText()));
+        try {
+            var userTable = new UsersService();
+            userTable.update(new UsersRecord(
+                    itemList.getId().getValue(),
+                    userNameInput.getText(),
+                    companyName.getSelectionModel().getSelectedIndex(),
+                    Integer.parseInt(userScoreInput.getText())));
+            updateUsersData();
+        }catch (NullPointerException e){
+            alertMessage("データを選択してください。");
+        }
+
     }
 
     /**
@@ -143,6 +159,12 @@ public class DB_UserManagementSystemController implements Initializable {
             userScoreInput.setText(itemList.getScore().getValue().toString());
         }
 
+    }
+
+    //ユーザの追加・編集・削除の度に呼び出す
+    private void updateUsersData(){
+        var usersTable=new UsersService();  //テーブル操作オブジェクト
+        this.dataTable.setItems(FXCollections.observableArrayList(usersTable.readAllUserData()));
     }
 
 

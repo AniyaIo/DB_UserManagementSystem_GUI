@@ -35,7 +35,7 @@ public class UsersDao  implements DBDao{
                 allData.add(new UsersRecord(
                         result.getInt("id"),
                         result.getString("name"),
-                        result.getInt("companyId"),
+                        result.getInt("company_id"),
                         result.getInt("score")));
             }
             return allData;
